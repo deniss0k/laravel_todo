@@ -5,6 +5,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use Symfony\Component\HttpFoundation\Response as ResponseAlias;
 use App\Models\Task as Task;
+use App\Http\Requests\TaskRequest as TaskRequest;
 
 /*
 |--------------------------------------------------------------------------
@@ -43,34 +44,15 @@ Route::get('/tasks/{task}', function (Task $task) {
     ]);
 })->name('tasks.show');
 
-Route::post('/tasks', function (Request $request) {
-    $data = $request->validate([
-        'title' => 'required|max:255',
-        'descr' => 'required',
-        'long_descr' => 'required',
-    ]);
-
-    $task = new Task;
-    $task->title = $data['title'];
-    $task->description = $data['descr'];
-    $task->long_description = $data['long_descr'];
-    $task->save();
+Route::post('/tasks', function (TaskRequest $request) {
+    $task = Task::create($request->validated());
 
     return redirect()->route('tasks.show', ['task' => $task->id])
         ->with('success', 'Task created successfully!');
 })->name('tasks.store');
 
-Route::put('/tasks/{task}', function (Task $task, Request $request) {
-    $data = $request->validate([
-        'title' => 'required|max:255',
-        'descr' => 'required',
-        'long_descr' => 'required',
-    ]);
-
-    $task->title = $data['title'];
-    $task->description = $data['descr'];
-    $task->long_description = $data['long_descr'];
-    $task->save();
+Route::put('/tasks/{task}', function (Task $task, TaskRequest $request) {
+    $task->update($request->validated());
 
     return redirect()->route('tasks.show', ['task' => $task->id])
         ->with('success', 'Task updated successfully!');
@@ -79,3 +61,4 @@ Route::put('/tasks/{task}', function (Task $task, Request $request) {
 Route::fallback(function () {
     return '404 :-(';
 });
+
