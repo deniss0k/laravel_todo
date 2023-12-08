@@ -1,9 +1,6 @@
 <?php
 
-use Illuminate\Http\Response;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
-use Symfony\Component\HttpFoundation\Response as ResponseAlias;
 use App\Http\Requests\TaskRequest as TaskRequest;
 
 use App\Models\Task;
@@ -25,8 +22,7 @@ Route::get('/', function () {
 
 Route::get('/tasks', function () {
     return view('index', [
-        'name' => 'Piotr',
-        'tasks' => Task::latest()->get(),
+        'tasks' => Task::latest()->paginate(10),
     ]);
 })->name('tasks.index');
 
@@ -58,6 +54,11 @@ Route::put('/tasks/{task}', function (Task $task, TaskRequest $request) {
     return redirect()->route('tasks.show', ['task' => $task->id])
         ->with('success', 'Task updated successfully!');
 })->name('tasks.update');
+
+Route::put('/tasks/{task}/toggle-complete', function (Task $task) {
+    $task->toggleComplete();
+    return redirect()->back();
+})->name('tasks.toggle-complete');
 
 Route::delete('/tasks/{task}', function (Task $task) {
     $task->delete();
